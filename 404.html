@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="404：失物招领处。">
+  <meta name="theme-color" content="#17191d">
+  <title>404 / Lost &amp; Found</title>
+
+  <style>
+    :root {
+      --night: #17191d;
+      --night-soft: #22262c;
+      --paper: #f5efe5;
+      --paper-deep: #ded6c9;
+      --ink: #282b30;
+      --muted: #70736f;
+      --rust: #d5654c;
+      --gold: #f1bd58;
+      --moss: #75a28c;
+      --cyan: #70d9df;
+      --line: rgba(40, 43, 48, 0.2);
+      --shadow: 8px 8px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--paper);
+      font-family: ui-rounded, "Avenir Next", "Nunito", -apple-system,
+        BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(241, 189, 88, 0.1), transparent 22rem),
+        radial-gradient(circle at 86% 82%, rgba(117, 162, 140, 0.11), transparent 24rem),
+        var(--night);
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .scene {
+      width: min(calc(100% - 40px), 1040px);
+      min-height: 100vh;
+      margin: 0 auto;
+    }
+
+    /* ---------- Fake 404 ---------- */
+    .error-scene {
+      position: relative;
+      display: grid;
+      padding: 28px 0 54px;
+      place-items: center;
+      transition: opacity 560ms ease, transform 620ms cubic-bezier(.5, 0, .2, 1), filter 540ms ease;
+    }
+
+    .home-link {
+      position: absolute;
+      top: 28px;
+      left: 0;
+      padding-bottom: 3px;
+      border-bottom: 1px solid transparent;
+      color: rgba(245, 239, 229, 0.7);
+      font-size: 0.86rem;
+      transition: color 150ms ease, border-color 150ms ease;
+    }
+
+    .home-link:hover {
+      border-color: currentColor;
+      color: var(--gold);
+    }
+
+    .not-found-card {
+      position: relative;
+      width: min(100%, 730px);
+      overflow: hidden;
+      padding: clamp(32px, 7vw, 62px);
+      border: 1px solid rgba(245, 239, 229, 0.26);
+      border-radius: 18px;
+      background: rgba(34, 38, 44, 0.8);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+      transition: transform 480ms ease, border-color 320ms ease, box-shadow 480ms ease;
+    }
+
+    .not-found-card::before,
+    .not-found-card::after {
+      position: absolute;
+      z-index: 2;
+      width: 1px;
+      height: 0;
+      content: "";
+      pointer-events: none;
+      background: var(--rust);
+      transform-origin: top;
+      transition: height 380ms ease;
+    }
+
+    .not-found-card::before {
+      top: 0;
+      left: 31%;
+      transform: rotate(-25deg);
+    }
+
+    .not-found-card::after {
+      right: 28%;
+      bottom: 0;
+      transform: rotate(146deg);
+    }
+
+    .system-line,
+    .error-reference {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .system-line {
+      margin: 0 0 28px;
+      color: rgba(245, 239, 229, 0.52);
+    }
+
+    .error-code {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      color: var(--paper);
+      font-size: clamp(7rem, 24vw, 13.5rem);
+      font-weight: 900;
+      letter-spacing: -0.1em;
+      line-height: 0.75;
+      transition: letter-spacing 350ms ease, color 350ms ease, transform 350ms ease;
+    }
+
+    .error-code span {
+      display: inline-block;
+      transition: transform 420ms cubic-bezier(.4, 0, .2, 1), color 250ms ease;
+    }
+
+    .unstable-zero {
+      width: 0.77em;
+      margin: 0 -0.04em;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      line-height: 0.75;
+      background: transparent;
+      text-shadow: 0 0 0 transparent;
+      transition: color 250ms ease, text-shadow 250ms ease, transform 250ms ease;
+    }
+
+    .unstable-zero:hover {
+      color: #fff9ed;
+    }
+
+    .unstable-zero:focus-visible,
+    .fragment:focus-visible,
+    .crack-button:focus-visible,
+    .scanner-button:focus-visible,
+    .game-button:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 5px;
+    }
+
+    .message {
+      max-width: 430px;
+      margin: 32px 0 26px;
+      color: rgba(245, 239, 229, 0.72);
+      font-size: 1.06rem;
+      line-height: 1.75;
+    }
+
+    .maybe-hint {
+      margin: -18px 0 26px;
+      color: rgba(245, 239, 229, 0.34);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-style: italic;
+      letter-spacing: 0.04em;
+    }
+
+    .error-reference {
+      margin: 0;
+      padding-top: 20px;
+      border-top: 1px solid rgba(245, 239, 229, 0.15);
+      color: rgba(245, 239, 229, 0.35);
+    }
+
+    .quiet-hint {
+      position: absolute;
+      right: clamp(18px, 5vw, 42px);
+      bottom: clamp(20px, 4vw, 34px);
+      max-width: 210px;
+      margin: 0;
+      color: var(--moss);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 420ms ease, transform 420ms ease;
+    }
+
+    .quiet-hint.visible {
+      opacity: 0.92;
+      transform: translateY(0);
+    }
+
+    body[data-break="1"] .not-found-card {
+      border-color: rgba(241, 189, 88, 0.52);
+      transform: rotate(-0.35deg) translateY(-2px);
+    }
+
+    body[data-break="1"] .not-found-card::before {
+      height: 170px;
+    }
+
+    body[data-break="1"] .unstable-zero {
+      color: var(--gold);
+      text-shadow: -2px 0 var(--rust), 2px 0 var(--moss);
+      transform: translateX(2px);
+    }
+
+    body[data-break="2"] .not-found-card {
+      border-color: var(--rust);
+      box-shadow: 11px 13px 0 rgba(213, 101, 76, 0.18), 0 24px 80px rgba(0, 0, 0, 0.3);
+      transform: rotate(0.65deg) translateY(-6px);
+    }
+
+    body[data-break="2"] .not-found-card::before,
+    body[data-break="2"] .not-found-card::after {
+      height: 390px;
+    }
+
+    body[data-break="2"] .error-code {
+      color: #fff7e9;
+      letter-spacing: -0.13em;
+    }
+
+    body[data-break="2"] .error-code span:first-child {
+      color: var(--rust);
+      transform: translate(-8px, 7px) rotate(-7deg);
+    }
+
+    body[data-break="2"] .error-code span:last-child {
+      color: var(--moss);
+      transform: translate(12px, -4px) rotate(5deg);
+    }
+
+    body[data-break="2"] .unstable-zero {
+      color: var(--paper);
+      text-shadow: -6px 0 var(--rust), 6px 0 var(--moss);
+      transform: scale(1.12) rotate(4deg);
+    }
+
+    body.game-opening .error-scene {
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+      transform: scale(0.94) rotate(-1deg);
+    }
+
+    /* ---------- Recovery game ---------- */
+    .game-scene {
+      padding: 30px 0 58px;
+      color: var(--ink);
+    }
+
+    .game-scene[hidden] {
+      display: none;
+    }
+
+    .game-topbar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      color: rgba(245, 239, 229, 0.72);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .game-topbar a:hover {
+      color: var(--gold);
+    }
+
+    .recovery-card {
+      overflow: hidden;
+      border: 1.5px solid var(--ink);
+      border-radius: 17px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .recovery-header {
+      display: flex;
+      gap: 24px;
+      align-items: end;
+      justify-content: space-between;
+      padding: clamp(28px, 6vw, 54px) clamp(25px, 6vw, 58px) 31px;
+      border-bottom: 1.5px solid var(--ink);
+      background: var(--paper);
+    }
+
+    .recovery-kicker {
+      margin: 0 0 8px;
+      color: var(--rust);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .recovery-header h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.07em;
+      line-height: 0.98;
+    }
+
+    .counter {
+      margin: 0;
+      color: var(--moss);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .recovery-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(250px, 0.75fr);
+      min-height: 515px;
+    }
+
+    .recovery-field {
+      position: relative;
+      min-height: 515px;
+      overflow: hidden;
+      border-right: 1.5px solid var(--ink);
+      touch-action: none;
+      background:
+        linear-gradient(rgba(40, 43, 48, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(40, 43, 48, 0.08) 1px, transparent 1px),
+        #fdf9f0;
+      background-size: 30px 30px;
+    }
+
+    .field-note {
+      position: absolute;
+      z-index: 1;
+      top: 21px;
+      left: 24px;
+      margin: 0;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .scanner-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .scanner-overlay::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 0;
+      content: "";
+      opacity: 0;
+      background:
+        linear-gradient(to bottom, rgba(112, 217, 223, 0), rgba(112, 217, 223, 0.18) 48%, rgba(112, 217, 223, 0)),
+        repeating-linear-gradient(to bottom, rgba(112, 217, 223, 0.22) 0 1px, transparent 1px 7px);
+      border-bottom: 2px solid var(--cyan);
+      box-shadow: 0 7px 18px rgba(112, 217, 223, 0.28);
+    }
+
+    .recovery-field.scanning .scanner-overlay::before {
+      height: 46%;
+      opacity: 1;
+      animation: scan-sweep 1.55s cubic-bezier(.35, 0, .2, 1) both;
+    }
+
+    @keyframes scan-sweep {
+      from { transform: translateY(-105%); }
+      to { transform: translateY(250%); }
+    }
+
+    .recovery-tray {
+      position: absolute;
+      z-index: 4;
+      right: 23px;
+      bottom: 21px;
+      display: grid;
+      width: 171px;
+      min-height: 78px;
+      padding: 10px;
+      border: 1.5px dashed rgba(40, 43, 48, 0.58);
+      border-radius: 7px;
+      place-items: center;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-align: center;
+      background: rgba(253, 249, 240, 0.75);
+      transition: border-color 150ms ease, color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .recovery-tray.drop-active {
+      border-style: solid;
+      border-color: var(--cyan);
+      color: #186d75;
+      background: rgba(112, 217, 223, 0.18);
+      transform: scale(1.04);
+    }
+
+    .fragment {
+      position: absolute;
+      z-index: 3;
+      min-width: 76px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      color: var(--ink);
+      cursor: grab;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      box-shadow: 3px 3px 0 var(--ink);
+      opacity: 0;
+      pointer-events: none;
+      transform: rotate(var(--r));
+      transition: opacity 320ms ease, transform 180ms ease, box-shadow 180ms ease;
+      user-select: none;
+    }
+
+    .fragment.revealed {
+      left: var(--x);
+      top: var(--y);
+      opacity: 1;
+      pointer-events: auto;
+      animation: signal-arrive 380ms ease both;
+    }
+
+    @keyframes signal-arrive {
+      from { opacity: 0; transform: translateY(-15px) rotate(var(--r)); }
+      to { opacity: 1; transform: translateY(0) rotate(var(--r)); }
+    }
+
+    .fragment:hover {
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .fragment.dragging {
+      z-index: 20;
+      cursor: grabbing;
+      box-shadow: 8px 9px 0 var(--ink);
+      transform: scale(1.08) rotate(0deg) !important;
+    }
+
+    .fragment.found {
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(1.7) rotate(14deg) !important;
+    }
+
+    .fragment-idea { background: var(--gold); }
+    .fragment-mod { color: #fffdf8; background: var(--rust); }
+    .fragment-script { background: var(--moss); }
+    .fragment-map { background: #d7d0ef; }
+    .fragment-bug { background: #f7c5bc; }
+
+    .crack-button {
+      position: absolute;
+      z-index: 2;
+      top: 43%;
+      left: 60%;
+      width: 70px;
+      height: 104px;
+      padding: 0;
+      border: 0;
+      cursor: pointer;
+      opacity: 0.38;
+      background: transparent;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .crack-button:hover {
+      opacity: 0.82;
+      transform: scale(1.05);
+    }
+
+    .crack-button span {
+      position: absolute;
+      display: block;
+      width: 2px;
+      height: 38px;
+      border-radius: 2px;
+      background: var(--ink);
+      transform-origin: top;
+      transition: height 160ms ease, background 160ms ease;
+    }
+
+    .crack-button span:nth-child(1) { top: 3px; left: 35px; transform: rotate(11deg); }
+    .crack-button span:nth-child(2) { top: 31px; left: 39px; transform: rotate(-37deg); }
+    .crack-button span:nth-child(3) { top: 50px; left: 25px; transform: rotate(24deg); }
+    .crack-button span:nth-child(4) { top: 71px; left: 34px; transform: rotate(-22deg); }
+
+    .recovery-field[data-crack="1"] .crack-button span { height: 48px; }
+    .recovery-field[data-crack="2"] .crack-button span { height: 58px; background: var(--rust); }
+    .recovery-field[data-crack="3"] .crack-button span { height: 67px; background: var(--rust); }
+    .recovery-field[data-crack="4"] .crack-button { pointer-events: none; opacity: 0; }
+
+    .debris {
+      position: absolute;
+      z-index: 18;
+      width: var(--size);
+      height: var(--size);
+      border: 1px solid var(--ink);
+      border-radius: 1px;
+      pointer-events: none;
+      background: var(--piece);
+      animation: debris-fall 680ms cubic-bezier(.22, .76, .34, 1) forwards;
+    }
+
+    @keyframes debris-fall {
+      0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--spin)); }
+    }
+
+    .found-panel {
+      display: flex;
+      padding: 28px 25px;
+      flex-direction: column;
+      background: var(--paper-deep);
+    }
+
+    .scanner-status {
+      margin-bottom: 22px;
+      padding: 13px 12px;
+      border: 1.5px solid var(--ink);
+      color: #356e73;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      line-height: 1.55;
+      background: rgba(112, 217, 223, 0.12);
+    }
+
+    .scanner-button {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 44px;
+      margin-bottom: 24px;
+      border: 1.5px solid var(--ink);
+      border-radius: 5px;
+      color: #edfefc;
+      cursor: pointer;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      background: #247a84;
+      box-shadow: 3px 3px 0 var(--ink);
+      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    }
+
+    .scanner-button:hover:not(:disabled) {
+      box-shadow: 1px 1px 0 var(--ink);
+      transform: translate(2px, 2px);
+      background: #19646d;
+    }
+
+    .scanner-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .scanner-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .found-panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .found-output {
+      min-height: 112px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.72;
+    }
+
+    .inventory {
+      display: grid;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 25px;
+    }
+
+    .inventory span {
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+      color: #96978f;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: rgba(255, 253, 248, 0.5);
+      transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .inventory span.collected {
+      border-color: var(--moss);
+      color: var(--ink);
+      background: rgba(117, 162, 140, 0.2);
+    }
+
+    .complete-panel {
+      display: none;
+      margin: 0;
+      padding: 25px 29px 30px;
+      border-top: 1.5px solid var(--ink);
+      background: var(--gold);
+    }
+
+    .complete-panel.visible {
+      display: block;
+      animation: arrive 360ms ease both;
+    }
+
+    .complete-panel p {
+      margin: 0 0 7px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .complete-panel h2 {
+      margin: 0 0 15px;
+      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .complete-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .game-button {
+      display: inline-flex;
+      min-height: 41px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 13px;
+      border: 1.5px solid var(--ink);
+      border-radius: 5px;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 900;
+      background: #fff9ed;
+      box-shadow: 2px 2px 0 var(--ink);
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .game-button:hover {
+      box-shadow: 0 0 0 var(--ink);
+      transform: translate(2px, 2px);
+      text-decoration: none;
+    }
+
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes screen-shake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-5px, 2px); }
+      40% { transform: translate(5px, -2px); }
+      60% { transform: translate(-3px, -3px); }
+      80% { transform: translate(3px, 2px); }
+    }
+
+    body.shake .game-scene {
+      animation: screen-shake 290ms ease-in-out;
+    }
+
+    @media (max-width: 760px) {
+      .home-link {
+        top: 20px;
+      }
+
+      .error-scene {
+        padding-top: 70px;
+      }
+
+      .recovery-header,
+      .recovery-body {
+        grid-template-columns: 1fr;
+      }
+
+      .recovery-header {
+        display: grid;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .recovery-field {
+        min-height: 450px;
+        border-right: 0;
+        border-bottom: 1.5px solid var(--ink);
+      }
+
+      .found-panel {
+        min-height: 355px;
+      }
+
+      .inventory {
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .scene {
+        width: min(calc(100% - 28px), 1040px);
+      }
+
+      .not-found-card {
+        padding: 31px 24px;
+      }
+
+      .message {
+        font-size: 0.97rem;
+      }
+
+      .recovery-field {
+        min-height: 410px;
+      }
+
+      .fragment {
+        min-width: 65px;
+        padding: 8px 9px;
+        font-size: 0.68rem;
+      }
+
+      .recovery-tray {
+        right: 14px;
+        bottom: 14px;
+        width: 135px;
+        min-height: 66px;
+        font-size: 0.62rem;
+      }
+
+      .crack-button {
+        left: 54%;
+      }
+
+      .complete-actions,
+      .complete-actions .game-button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-break="0">
+  <main class="scene error-scene" id="errorScene">
+    <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+    <a class="home-link" href="/playground/">← 返回游乐场</a>
+
+    <section class="not-found-card" aria-labelledby="errorTitle">
+      <p class="system-line">PAGE STATUS: UNAVAILABLE</p>
+
+      <h1 class="error-code" id="errorTitle" aria-label="Error 404">
+        <span>4</span>
+        <button class="unstable-zero" id="unstableZero" type="button" aria-label="检查不稳定的零">0</button>
+        <span>4</span>
+      </h1>
+
+      <p class="message" id="errorMessage">This page could not be found.</p>
+      <p class="maybe-hint">Maybe?</p>
+      <p class="error-reference">ERROR REFERENCE: 404.00.04</p>
+      <p class="quiet-hint" id="quietHint" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <main class="scene game-scene" id="gameScene" hidden>
+    <div class="game-topbar">
+      <span>LOST &amp; FOUND / RECOVERY MODE</span>
+      <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+      <a href="/playground/">退出并返回游乐场 ↗</a>
+    </div>
+
+    <section class="recovery-card" aria-labelledby="recoveryTitle">
+      <header class="recovery-header">
+        <div>
+          <p class="recovery-kicker">404: Lost &amp; Found</p>
+          <h1 id="recoveryTitle">失物招领处。</h1>
+        </div>
+        <p class="counter" id="counter" aria-live="polite">RECOVERED 0 / 5</p>
+      </header>
+
+      <div class="recovery-body">
+        <section class="recovery-field" id="recoveryField" data-crack="0" aria-label="丢失碎片区域">
+          <p class="field-note">SCAN, SEARCH, THEN DRAG SIGNALS INTO THE TRAY</p>
+          <div class="scanner-overlay" aria-hidden="true"></div>
+          <div class="recovery-tray" id="recoveryTray">RECOVERY<br>TRAY</div>
+
+          <button class="fragment fragment-idea" type="button" data-fragment="idea"
+                  style="--x: 12%; --y: 25%; --r: -5deg;">IDEA</button>
+          <button class="fragment fragment-mod" type="button" data-fragment="mod"
+                  style="--x: 26%; --y: 58%; --r: 3deg;">MOD</button>
+          <button class="fragment fragment-script" type="button" data-fragment="script"
+                  style="--x: 68%; --y: 29%; --r: 5deg;">SCRIPT</button>
+          <button class="fragment fragment-map" type="button" data-fragment="map"
+                  style="--x: 47%; --y: 65%; --r: -3deg;">MAP</button>
+
+          <!-- BUG? 不会被普通扫描直接显示。连续点击下方裂缝后，它才会掉出来。 -->
+          <button class="fragment fragment-bug" type="button" data-fragment="bug"
+                  style="--x: 61%; --y: 42%; --r: 7deg;">BUG?</button>
+
+          <button class="crack-button" id="crackButton" type="button" aria-label="检查场地中的细小裂缝">
+            <span></span><span></span><span></span><span></span>
+          </button>
+        </section>
+
+        <aside class="found-panel" aria-live="polite">
+          <div class="scanner-status" id="scanReadout">SCANNER STATUS: IDLE<br>UNRESOLVED SIGNALS: --</div>
+          <button class="scanner-button" id="scanAreaButton" type="button">
+            <span class="scanner-dot"></span> START AREA SCAN
+          </button>
+
+          <h2 id="foundTitle">等待扫描。</h2>
+          <p class="found-output" id="foundOutput">
+            按下扫描按钮定位遗失信号。扫描完成后，把方块拖进左侧场地底部的回收槽。
+          </p>
+
+          <div class="inventory" aria-label="已找回物品">
+            <span id="item-idea">□ IDEA</span>
+            <span id="item-mod">□ MOD</span>
+            <span id="item-script">□ SCRIPT</span>
+            <span id="item-map">□ MAP</span>
+            <span id="item-bug">□ BUG?</span>
+          </div>
+        </aside>
+      </div>
+
+      <section class="complete-panel" id="completePanel" aria-live="polite">
+        <p>Recovered side quest</p>
+        <h2 id="questTitle">做一个小得离谱、却真的存在的东西。</h2>
+        <div class="complete-actions">
+          <button class="game-button" id="retryButton" type="button">重新散落碎片</button>
+          <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+          <a class="game-button" href="/playground/">带着它回游乐场</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const quietHints = [
+      "中间的 0，似乎没有和其他数字待在同一个位置。",
+      "有些东西不是丢失了，只是还没有被找回。"
+    ];
+
+    const fragmentInfo = {
+      idea: {
+        title: "找回：IDEA",
+        text: "一条还没来得及成为项目的想法。它不需要立刻完成，只需要先被留下。"
+      },
+      mod: {
+        title: "找回：MOD",
+        text: "一条想要偏离原有规则的冲动。也许它会成为一个有趣的游戏改动。"
+      },
+      script: {
+        title: "找回：SCRIPT",
+        text: "一个值得自动化的小麻烦。它看起来很小，但可能替你省下很多次重复。"
+      },
+      map: {
+        title: "找回：MAP",
+        text: "一张还没有画完的地图。上面缺少道路，但已经有了一个想去的方向。"
+      },
+      bug: {
+        title: "找回：BUG?",
+        text: "它也许是一个 Bug，也许只是一个尚未被理解的功能。先不要急着删掉它。"
+      }
+    };
+
+    const sideQuests = [
+      "做一个小得离谱、却真的存在的东西。",
+      "把一个无聊步骤交给脚本，然后把省下的十分钟拿去散步。",
+      "给某个游戏规则轻轻推一下，看看会不会露出新的入口。",
+      "为一个暂时没有答案的问题，先做一个可以点击的版本。"
+    ];
+
+    const body = document.body;
+    const errorScene = document.getElementById("errorScene");
+    const gameScene = document.getElementById("gameScene");
+    const unstableZero = document.getElementById("unstableZero");
+    const errorMessage = document.getElementById("errorMessage");
+    const quietHint = document.getElementById("quietHint");
+
+    const recoveryField = document.getElementById("recoveryField");
+    const recoveryTray = document.getElementById("recoveryTray");
+    const scanAreaButton = document.getElementById("scanAreaButton");
+    const scanReadout = document.getElementById("scanReadout");
+    const crackButton = document.getElementById("crackButton");
+    const counter = document.getElementById("counter");
+    const foundTitle = document.getElementById("foundTitle");
+    const foundOutput = document.getElementById("foundOutput");
+    const completePanel = document.getElementById("completePanel");
+    const questTitle = document.getElementById("questTitle");
+    const retryButton = document.getElementById("retryButton");
+    const fragmentButtons = [...document.querySelectorAll(".fragment")];
+    const normalFragments = fragmentButtons.filter((button) => button.dataset.fragment !== "bug");
+    const bugFragment = document.querySelector('[data-fragment="bug"]');
+
+    let errorTouches = 0;
+    let hintIndex = 0;
+    let scanned = false;
+    let scanning = false;
+    let recovered = 0;
+    let crackHits = 0;
+    let activeDrag = null;
+
+    function showQuietHint() {
+      if (errorTouches >= 3 || errorScene.hidden) return;
+      quietHint.textContent = quietHints[hintIndex % quietHints.length];
+      hintIndex += 1;
+      quietHint.classList.add("visible");
+      window.setTimeout(() => quietHint.classList.remove("visible"), 3500);
+    }
+
+    function touchError() {
+      if (errorTouches >= 3) return;
+      errorTouches += 1;
+      body.dataset.break = String(errorTouches);
+
+      if (errorTouches === 1) {
+        errorMessage.textContent = "This page could not be found.";
+      } else if (errorTouches === 2) {
+        errorMessage.textContent = "This page could not be found.";
+      } else {
+        window.setTimeout(openRecoveryRoom, 720);
+      }
+    }
+
+    function openRecoveryRoom() {
+      body.classList.add("game-opening");
+      window.setTimeout(() => {
+        errorScene.hidden = true;
+        gameScene.hidden = false;
+        gameScene.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 520);
+    }
+
+    function startAreaScan() {
+      if (scanned || scanning) return;
+      scanning = true;
+      scanAreaButton.disabled = true;
+      scanAreaButton.innerHTML = '<span class="scanner-dot"></span> SCANNING…';
+      scanReadout.innerHTML = "SCANNER STATUS: SWEEPING FIELD<br>UNRESOLVED SIGNALS: CALCULATING";
+      foundTitle.textContent = "正在扫描。";
+      foundOutput.textContent = "扫描线会标记四个稳定信号。还有一个信号似乎被藏在了场地结构内部。";
+      recoveryField.classList.add("scanning");
+
+      window.setTimeout(() => {
+        scanning = false;
+        scanned = true;
+        recoveryField.classList.remove("scanning");
+        normalFragments.forEach((button, index) => {
+          window.setTimeout(() => button.classList.add("revealed"), index * 105);
+        });
+        scanReadout.innerHTML = "SCANNER STATUS: COMPLETE<br>UNRESOLVED SIGNALS: 5 (1 OBSCURED)";
+        scanAreaButton.innerHTML = '<span class="scanner-dot"></span> SCAN COMPLETE';
+        foundTitle.textContent = "四个信号已定位。";
+        foundOutput.textContent = "把方块拖到回收槽中。还有一个信号没有来源——也许场地本身并不完整。";
+      }, 1550);
+    }
+
+    function isOverTray(button) {
+      const buttonRect = button.getBoundingClientRect();
+      const trayRect = recoveryTray.getBoundingClientRect();
+      const centerX = buttonRect.left + buttonRect.width / 2;
+      const centerY = buttonRect.top + buttonRect.height / 2;
+      return centerX >= trayRect.left && centerX <= trayRect.right && centerY >= trayRect.top && centerY <= trayRect.bottom;
+    }
+
+    function primePosition(button) {
+      const fieldRect = recoveryField.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect();
+      button.style.left = `${buttonRect.left - fieldRect.left}px`;
+      button.style.top = `${buttonRect.top - fieldRect.top}px`;
+      button.style.right = "auto";
+      button.style.bottom = "auto";
+    }
+
+    function beginDrag(event, button) {
+      if (!scanned || !button.classList.contains("revealed") || button.classList.contains("found")) return;
+      event.preventDefault();
+      primePosition(button);
+
+      const buttonRect = button.getBoundingClientRect();
+      activeDrag = {
+        button,
+        pointerId: event.pointerId,
+        offsetX: event.clientX - buttonRect.left,
+        offsetY: event.clientY - buttonRect.top
+      };
+
+      button.classList.add("dragging");
+      button.setPointerCapture(event.pointerId);
+    }
+
+    function moveDrag(event) {
+      if (!activeDrag || activeDrag.pointerId !== event.pointerId) return;
+
+      const { button, offsetX, offsetY } = activeDrag;
+      const fieldRect = recoveryField.getBoundingClientRect();
+      const maxX = fieldRect.width - button.offsetWidth - 7;
+      const maxY = fieldRect.height - button.offsetHeight - 7;
+      const nextX = Math.min(Math.max(event.clientX - fieldRect.left - offsetX, 7), maxX);
+      const nextY = Math.min(Math.max(event.clientY - fieldRect.top - offsetY, 7), maxY);
+
+      button.style.left = `${nextX}px`;
+      button.style.top = `${nextY}px`;
+      recoveryTray.classList.toggle("drop-active", isOverTray(button));
+    }
+
+    function endDrag(event) {
+      if (!activeDrag || activeDrag.pointerId !== event.pointerId) return;
+
+      const { button } = activeDrag;
+      const shouldRecover = isOverTray(button);
+      button.classList.remove("dragging");
+      recoveryTray.classList.remove("drop-active");
+      activeDrag = null;
+
+      if (button.hasPointerCapture(event.pointerId)) {
+        button.releasePointerCapture(event.pointerId);
+      }
+
+      if (shouldRecover) recoverFragment(button);
+    }
+
+    function recoverFragment(button) {
+      if (button.classList.contains("found")) return;
+
+      const key = button.dataset.fragment;
+      const fragment = fragmentInfo[key];
+      button.classList.add("found");
+      button.disabled = true;
+      recovered += 1;
+
+      const item = document.getElementById(`item-${key}`);
+      item.classList.add("collected");
+      item.textContent = `✓ ${key.toUpperCase()}`;
+      counter.textContent = `RECOVERED ${recovered} / 5`;
+      foundTitle.textContent = fragment.title;
+      foundOutput.textContent = fragment.text;
+
+      if (recovered === 4 && !bugFragment.classList.contains("revealed")) {
+        scanReadout.innerHTML = "SCANNER STATUS: INCOMPLETE<br>UNRESOLVED SIGNALS: 1 (STRUCTURAL)";
+        foundTitle.textContent = "还有一个信号。";
+        foundOutput.textContent = "扫描结果指向场地中的一处细小裂缝。它看起来不像普通的装饰。";
+      }
+
+      if (recovered === fragmentButtons.length) {
+        const quest = sideQuests[Math.floor(Math.random() * sideQuests.length)];
+        questTitle.textContent = quest;
+        completePanel.classList.add("visible");
+        scanReadout.innerHTML = "SCANNER STATUS: STABLE<br>UNRESOLVED SIGNALS: 0";
+        foundTitle.textContent = "全部找回。";
+        foundOutput.textContent = "错误页面已恢复稳定。你带走的不是一个“正确答案”，而是一张新的支线任务卡。";
+      }
+    }
+
+    function shakeScreen() {
+      body.classList.remove("shake");
+      void gameScene.offsetWidth;
+      body.classList.add("shake");
+      window.setTimeout(() => body.classList.remove("shake"), 320);
+    }
+
+    function spawnDebris() {
+      const fieldRect = recoveryField.getBoundingClientRect();
+      const crackRect = crackButton.getBoundingClientRect();
+      const originX = crackRect.left - fieldRect.left + crackRect.width / 2;
+      const originY = crackRect.top - fieldRect.top + crackRect.height / 2;
+      const colors = ["#d5654c", "#f1bd58", "#75a28c", "#d7d0ef", "#f5efe5"];
+      const pieces = 7 + crackHits * 2;
+
+      for (let index = 0; index < pieces; index += 1) {
+        const particle = document.createElement("span");
+        particle.className = "debris";
+        particle.style.left = `${originX + (Math.random() * 22 - 11)}px`;
+        particle.style.top = `${originY + (Math.random() * 18 - 9)}px`;
+        particle.style.setProperty("--size", `${3 + Math.random() * 5}px`);
+        particle.style.setProperty("--dx", `${Math.random() * 140 - 70}px`);
+        particle.style.setProperty("--dy", `${60 + Math.random() * 120}px`);
+        particle.style.setProperty("--spin", `${Math.random() * 560 - 280}deg`);
+        particle.style.setProperty("--piece", colors[index % colors.length]);
+        recoveryField.appendChild(particle);
+        window.setTimeout(() => particle.remove(), 730);
+      }
+    }
+
+    function inspectCrack() {
+      if (!scanned || crackHits >= 4) return;
+      crackHits += 1;
+      recoveryField.dataset.crack = String(crackHits);
+      shakeScreen();
+      spawnDebris();
+
+      if (crackHits < 4) {
+        scanReadout.innerHTML = `SCANNER STATUS: STRUCTURAL FRACTURE<br>UNRESOLVED SIGNALS: 1 / CRACK ${crackHits} OF 4`;
+        foundTitle.textContent = "裂缝正在扩大。";
+        foundOutput.textContent = "有东西卡在里面。再靠近一点，也许它会自己掉出来。";
+      } else {
+        bugFragment.classList.add("revealed");
+        scanReadout.innerHTML = "SCANNER STATUS: ANOMALY DISLODGED<br>UNRESOLVED SIGNALS: 1";
+        foundTitle.textContent = "找到了不该在这里的东西。";
+        foundOutput.textContent = "它看起来像一个 BUG?。把它也拖进回收槽，看看这个页面会不会承认自己并不完全错误。";
+      }
+    }
+
+    function resetRecovery() {
+      scanned = false;
+      scanning = false;
+      recovered = 0;
+      crackHits = 0;
+      activeDrag = null;
+      recoveryField.classList.remove("scanning");
+      recoveryField.dataset.crack = "0";
+      counter.textContent = "RECOVERED 0 / 5";
+      scanReadout.innerHTML = "SCANNER STATUS: IDLE<br>UNRESOLVED SIGNALS: --";
+      foundTitle.textContent = "等待扫描。";
+      foundOutput.textContent = "按下扫描按钮定位遗失信号。扫描完成后，把方块拖进左侧场地底部的回收槽。";
+      scanAreaButton.disabled = false;
+      scanAreaButton.innerHTML = '<span class="scanner-dot"></span> START AREA SCAN';
+      completePanel.classList.remove("visible");
+
+      fragmentButtons.forEach((button) => {
+        const key = button.dataset.fragment;
+        button.classList.remove("revealed", "found", "dragging");
+        button.disabled = false;
+        button.style.removeProperty("left");
+        button.style.removeProperty("top");
+        button.style.removeProperty("right");
+        button.style.removeProperty("bottom");
+        const item = document.getElementById(`item-${key}`);
+        item.classList.remove("collected");
+        item.textContent = `□ ${key.toUpperCase()}`;
+      });
+    }
+
+    unstableZero.addEventListener("click", touchError);
+    scanAreaButton.addEventListener("click", startAreaScan);
+    crackButton.addEventListener("click", inspectCrack);
+    retryButton.addEventListener("click", resetRecovery);
+
+    fragmentButtons.forEach((button) => {
+      button.addEventListener("pointerdown", (event) => beginDrag(event, button));
+      button.addEventListener("pointermove", moveDrag);
+      button.addEventListener("pointerup", endDrag);
+      button.addEventListener("pointercancel", endDrag);
+      button.addEventListener("keydown", (event) => {
+        if (scanned && button.classList.contains("revealed") && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          recoverFragment(button);
+        }
+      });
+    });
+
+    // 404 的提示保持低调：停留一会儿才会短暂出现，不影响真的迷路的访客直接返回主页。
+    window.setTimeout(showQuietHint, 5200);
+    window.setTimeout(showQuietHint, 14500);
+  </script>
+</body>
+</html>
