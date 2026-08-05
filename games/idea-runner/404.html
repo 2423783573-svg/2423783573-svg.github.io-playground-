@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="404：失物招领处。">
+  <meta name="theme-color" content="#17191d">
+  <title>404 / Lost &amp; Found</title>
+
+  <style>
+    :root {
+      --night: #17191d;
+      --night-soft: #20242a;
+      --paper: #f5efe5;
+      --paper-dim: #ded6c9;
+      --ink: #272a2e;
+      --muted: #72746f;
+      --rust: #d5654c;
+      --gold: #f1bd58;
+      --moss: #6e9a84;
+      --line: rgba(39, 42, 46, 0.2);
+      --shadow: 7px 7px 0 rgba(0, 0, 0, 0.23);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--paper);
+      font-family: ui-rounded, "Avenir Next", "Nunito", -apple-system,
+        BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(241, 189, 88, 0.12), transparent 22rem),
+        radial-gradient(circle at 86% 82%, rgba(110, 154, 132, 0.12), transparent 24rem),
+        var(--night);
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .scene {
+      width: min(calc(100% - 40px), 1040px);
+      min-height: 100vh;
+      margin: 0 auto;
+    }
+
+    .error-scene {
+      position: relative;
+      display: grid;
+      padding: 28px 0 54px;
+      place-items: center;
+      transition: opacity 500ms ease, transform 600ms cubic-bezier(.5, 0, .2, 1), filter 500ms ease;
+    }
+
+    .top-links {
+      position: absolute;
+      top: 28px;
+      right: 0;
+      left: 0;
+      display: flex;
+      justify-content: space-between;
+      color: rgba(245, 239, 229, 0.72);
+      font-size: 0.86rem;
+    }
+
+    .home-link,
+    .skip-link {
+      padding-bottom: 3px;
+      border-bottom: 1px solid transparent;
+      transition: color 150ms ease, border-color 150ms ease;
+    }
+
+    .home-link:hover,
+    .skip-link:hover {
+      border-color: currentColor;
+      color: var(--gold);
+    }
+
+    .skip-link {
+      border: 0;
+      color: rgba(245, 239, 229, 0.55);
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .not-found-card {
+      position: relative;
+      width: min(100%, 730px);
+      overflow: hidden;
+      padding: clamp(32px, 7vw, 62px);
+      border: 1px solid rgba(245, 239, 229, 0.26);
+      border-radius: 18px;
+      background: rgba(32, 36, 42, 0.78);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+      transition: transform 480ms ease, border-color 320ms ease, box-shadow 480ms ease;
+    }
+
+    .not-found-card::before,
+    .not-found-card::after {
+      position: absolute;
+      z-index: 2;
+      width: 1px;
+      height: 0;
+      content: "";
+      pointer-events: none;
+      background: var(--rust);
+      transform-origin: top;
+      transition: height 380ms ease;
+    }
+
+    .not-found-card::before {
+      top: 0;
+      left: 31%;
+      transform: rotate(-25deg);
+    }
+
+    .not-found-card::after {
+      right: 28%;
+      bottom: 0;
+      transform: rotate(146deg);
+    }
+
+    .system-line,
+    .status-line,
+    .scan-button {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .system-line {
+      margin: 0 0 27px;
+      color: rgba(245, 239, 229, 0.56);
+    }
+
+    .error-code {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      color: var(--paper);
+      font-size: clamp(7rem, 24vw, 13.5rem);
+      font-weight: 900;
+      letter-spacing: -0.1em;
+      line-height: 0.75;
+      transition: letter-spacing 350ms ease, color 350ms ease, transform 350ms ease;
+    }
+
+    .error-code span {
+      display: inline-block;
+      transition: transform 420ms cubic-bezier(.4, 0, .2, 1), color 250ms ease;
+    }
+
+    .unstable-zero {
+      width: 0.77em;
+      margin: 0 -0.04em;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      line-height: 0.75;
+      background: transparent;
+      text-shadow: 0 0 0 transparent;
+      transition: color 250ms ease, text-shadow 250ms ease, transform 250ms ease;
+    }
+
+    .unstable-zero:focus-visible,
+    .scan-button:focus-visible,
+    .fragment:focus-visible,
+    .game-button:focus-visible,
+    .skip-link:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 5px;
+    }
+
+    .message {
+      max-width: 450px;
+      margin: 32px 0 28px;
+      color: rgba(245, 239, 229, 0.74);
+      font-size: 1.06rem;
+      line-height: 1.75;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(245, 239, 229, 0.16);
+    }
+
+    .status-line {
+      color: rgba(245, 239, 229, 0.44);
+    }
+
+    .scan-button {
+      padding: 8px 10px;
+      border: 1px solid rgba(245, 239, 229, 0.4);
+      border-radius: 5px;
+      color: var(--paper);
+      cursor: pointer;
+      background: transparent;
+      transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+    }
+
+    .scan-button:hover {
+      border-color: var(--gold);
+      background: rgba(241, 189, 88, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .scan-count {
+      color: var(--gold);
+    }
+
+    .clue {
+      min-height: 1.7em;
+      margin: 17px 0 0;
+      color: var(--moss);
+      font-size: 0.88rem;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    body[data-break="1"] .clue,
+    body[data-break="2"] .clue {
+      opacity: 1;
+    }
+
+    body[data-break="1"] .not-found-card {
+      border-color: rgba(241, 189, 88, 0.6);
+      transform: rotate(-0.45deg) translateY(-2px);
+    }
+
+    body[data-break="1"] .not-found-card::before {
+      height: 180px;
+    }
+
+    body[data-break="1"] .unstable-zero {
+      color: var(--gold);
+      text-shadow: -2px 0 var(--rust), 2px 0 var(--moss);
+      transform: translateX(2px);
+    }
+
+    body[data-break="2"] .not-found-card {
+      border-color: var(--rust);
+      box-shadow: 11px 13px 0 rgba(213, 101, 76, 0.2), 0 24px 80px rgba(0, 0, 0, 0.3);
+      transform: rotate(0.65deg) translateY(-6px);
+    }
+
+    body[data-break="2"] .not-found-card::before,
+    body[data-break="2"] .not-found-card::after {
+      height: 390px;
+    }
+
+    body[data-break="2"] .error-code {
+      color: #fff7e9;
+      letter-spacing: -0.13em;
+    }
+
+    body[data-break="2"] .error-code span:first-child {
+      color: var(--rust);
+      transform: translate(-8px, 7px) rotate(-7deg);
+    }
+
+    body[data-break="2"] .error-code span:last-child {
+      color: var(--moss);
+      transform: translate(12px, -4px) rotate(5deg);
+    }
+
+    body[data-break="2"] .unstable-zero {
+      color: var(--paper);
+      text-shadow: -6px 0 var(--rust), 6px 0 var(--moss);
+      transform: scale(1.12) rotate(4deg);
+    }
+
+    body.game-opening .error-scene {
+      opacity: 0;
+      filter: blur(8px);
+      pointer-events: none;
+      transform: scale(0.94) rotate(-1deg);
+    }
+
+    .game-scene {
+      padding: 30px 0 58px;
+      color: var(--ink);
+    }
+
+    .game-scene[hidden] {
+      display: none;
+    }
+
+    .game-topbar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      color: rgba(245, 239, 229, 0.7);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .recovery-card {
+      overflow: hidden;
+      border: 1.5px solid var(--ink);
+      border-radius: 17px;
+      background: var(--paper);
+      box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.32);
+    }
+
+    .recovery-header {
+      display: flex;
+      gap: 24px;
+      align-items: end;
+      justify-content: space-between;
+      padding: clamp(28px, 6vw, 54px) clamp(25px, 6vw, 58px) 31px;
+      border-bottom: 1.5px solid var(--ink);
+      background: var(--paper);
+    }
+
+    .recovery-kicker {
+      margin: 0 0 8px;
+      color: var(--rust);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .recovery-header h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.07em;
+      line-height: 0.98;
+    }
+
+    .counter {
+      margin: 0;
+      color: var(--moss);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .recovery-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(240px, 0.75fr);
+      min-height: 495px;
+    }
+
+    .recovery-field {
+      position: relative;
+      min-height: 495px;
+      overflow: hidden;
+      border-right: 1.5px solid var(--ink);
+      background:
+        linear-gradient(rgba(39, 42, 46, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(39, 42, 46, 0.08) 1px, transparent 1px),
+        #fdf9f0;
+      background-size: 30px 30px;
+    }
+
+    .field-note {
+      position: absolute;
+      top: 22px;
+      left: 24px;
+      margin: 0;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .fragment {
+      position: absolute;
+      z-index: 1;
+      min-width: 76px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--ink);
+      border-radius: 6px;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      box-shadow: 3px 3px 0 var(--ink);
+      transition: opacity 240ms ease, transform 240ms ease, box-shadow 180ms ease;
+    }
+
+    .fragment:hover {
+      transform: translate(-2px, -2px) rotate(-2deg) !important;
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .fragment.found {
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(1.9) rotate(14deg) !important;
+    }
+
+    .fragment-idea {
+      top: 24%;
+      left: 12%;
+      background: var(--gold);
+      transform: rotate(-5deg);
+    }
+
+    .fragment-mod {
+      top: 58%;
+      left: 25%;
+      color: #fdf9f0;
+      background: var(--rust);
+      transform: rotate(3deg);
+    }
+
+    .fragment-script {
+      top: 31%;
+      right: 13%;
+      background: var(--moss);
+      transform: rotate(5deg);
+    }
+
+    .fragment-map {
+      right: 28%;
+      bottom: 14%;
+      background: #d7d0ef;
+      transform: rotate(-3deg);
+    }
+
+    .fragment-bug {
+      bottom: 27%;
+      left: 7%;
+      background: #f7c5bc;
+      transform: rotate(7deg);
+    }
+
+    .found-panel {
+      display: flex;
+      padding: 29px 25px;
+      flex-direction: column;
+      background: var(--paper-deep);
+    }
+
+    .found-panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .found-output {
+      min-height: 115px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.72;
+    }
+
+    .inventory {
+      display: grid;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 28px;
+    }
+
+    .inventory span {
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+      color: #9a9b94;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: rgba(255, 253, 248, 0.5);
+      transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .inventory span.collected {
+      border-color: var(--moss);
+      color: var(--ink);
+      background: rgba(110, 154, 132, 0.19);
+    }
+
+    .complete-panel {
+      display: none;
+      margin: 0;
+      padding: 25px 29px 30px;
+      border-top: 1.5px solid var(--ink);
+      background: var(--gold);
+    }
+
+    .complete-panel.visible {
+      display: block;
+      animation: arrive 360ms ease both;
+    }
+
+    .complete-panel p {
+      margin: 0 0 7px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .complete-panel h2 {
+      margin: 0 0 15px;
+      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .complete-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .game-button {
+      display: inline-flex;
+      min-height: 41px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 13px;
+      border: 1.5px solid var(--ink);
+      border-radius: 5px;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 900;
+      background: #fff9ed;
+      box-shadow: 2px 2px 0 var(--ink);
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .game-button:hover {
+      box-shadow: 0 0 0 var(--ink);
+      transform: translate(2px, 2px);
+      text-decoration: none;
+    }
+
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 760px) {
+      .top-links {
+        top: 20px;
+      }
+
+      .error-scene {
+        padding-top: 72px;
+      }
+
+      .recovery-header,
+      .recovery-body {
+        grid-template-columns: 1fr;
+      }
+
+      .recovery-header {
+        display: grid;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .recovery-field {
+        min-height: 430px;
+        border-right: 0;
+        border-bottom: 1.5px solid var(--ink);
+      }
+
+      .found-panel {
+        min-height: 305px;
+      }
+
+      .inventory {
+        margin-top: 20px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .scene {
+        width: min(calc(100% - 28px), 1040px);
+      }
+
+      .top-links {
+        font-size: 0.78rem;
+      }
+
+      .not-found-card {
+        padding: 31px 24px;
+      }
+
+      .message {
+        font-size: 0.97rem;
+      }
+
+      .status-row {
+        align-items: stretch;
+      }
+
+      .scan-button {
+        width: 100%;
+      }
+
+      .recovery-field {
+        min-height: 390px;
+      }
+
+      .fragment {
+        min-width: 65px;
+        padding: 8px 9px;
+        font-size: 0.68rem;
+      }
+
+      .fragment-script {
+        right: 6%;
+      }
+
+      .fragment-map {
+        right: 17%;
+      }
+
+      .complete-actions,
+      .complete-actions .game-button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+
+<body data-break="0">
+  <main class="scene error-scene" id="errorScene">
+    <div class="top-links">
+      <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+      <a class="home-link" href="/playground/">← 返回游乐场</a>
+      <button class="skip-link" id="skipToGame" type="button">这不像普通的 404 →</button>
+    </div>
+
+    <section class="not-found-card" aria-labelledby="errorTitle">
+      <p class="system-line">PAGE STATUS: UNAVAILABLE</p>
+
+      <h1 class="error-code" id="errorTitle" aria-label="Error 404">
+        <span>4</span>
+        <button class="unstable-zero" id="unstableZero" type="button" aria-label="检查不稳定的零">0</button>
+        <span>4</span>
+      </h1>
+
+      <p class="message" id="errorMessage">
+        This page could not be found. Or perhaps it has been misplaced somewhere more interesting.
+      </p>
+
+      <div class="status-row">
+        <span class="status-line" id="statusLine">LOST ITEMS: 0</span>
+        <button class="scan-button" id="scanButton" type="button">
+          RUN RECOVERY SCAN <span class="scan-count" id="scanCount">0 / 3</span>
+        </button>
+      </div>
+
+      <p class="clue" id="clueText" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <main class="scene game-scene" id="gameScene" hidden>
+    <div class="game-topbar">
+      <span>LOST &amp; FOUND / RECOVERY MODE</span>
+      <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+      <a href="/playground/">退出并返回游乐场 ↗</a>
+    </div>
+
+    <section class="recovery-card" aria-labelledby="recoveryTitle">
+      <header class="recovery-header">
+        <div>
+          <p class="recovery-kicker">404: Lost &amp; Found</p>
+          <h1 id="recoveryTitle">失物招领处。</h1>
+        </div>
+        <p class="counter" id="counter" aria-live="polite">RECOVERED 0 / 5</p>
+      </header>
+
+      <div class="recovery-body">
+        <section class="recovery-field" aria-label="丢失碎片区域">
+          <p class="field-note">CLICK EACH LOST FRAGMENT TO STABILIZE IT</p>
+
+          <button class="fragment fragment-idea" type="button" data-fragment="idea">IDEA</button>
+          <button class="fragment fragment-mod" type="button" data-fragment="mod">MOD</button>
+          <button class="fragment fragment-script" type="button" data-fragment="script">SCRIPT</button>
+          <button class="fragment fragment-map" type="button" data-fragment="map">MAP</button>
+          <button class="fragment fragment-bug" type="button" data-fragment="bug">BUG?</button>
+        </section>
+
+        <aside class="found-panel" aria-live="polite">
+          <h2 id="foundTitle">扫描已开始。</h2>
+          <p class="found-output" id="foundOutput">
+            这里藏着五个被错误页面吞掉的碎片。逐个点击它们，把它们带回来。
+          </p>
+
+          <div class="inventory" aria-label="已找回物品">
+            <span id="item-idea">□ IDEA</span>
+            <span id="item-mod">□ MOD</span>
+            <span id="item-script">□ SCRIPT</span>
+            <span id="item-map">□ MAP</span>
+            <span id="item-bug">□ BUG?</span>
+          </div>
+        </aside>
+      </div>
+
+      <section class="complete-panel" id="completePanel" aria-live="polite">
+        <p>Recovered side quest</p>
+        <h2 id="questTitle">做一个小得离谱、却真的存在的东西。</h2>
+        <div class="complete-actions">
+          <button class="game-button" id="retryButton" type="button">再丢一次</button>
+          <!-- 若仓库名称不是 playground，请将 /playground/ 改成对应路径。 -->
+          <a class="game-button" href="/playground/">带着它回游乐场</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // 若仓库名称不是 playground，请把下面的路径改为对应的 GitHub Pages 项目路径。
+    const HOME_PATH = "/playground/";
+
+    const clues = [
+      "扫描发现：有一个错误对象正在假装成数字 0。",
+      "扫描发现：这不是“找不到”，而是“还没有被找回”。"
+    ];
+
+    const fragments = {
+      idea: {
+        title: "找回：IDEA",
+        text: "一条还没来得及成为项目的想法。它不需要被立刻完成，只需要被留下。"
+      },
+      mod: {
+        title: "找回：MOD",
+        text: "一条想要偏离原有规则的冲动。也许它会成为一个有趣的游戏改动。"
+      },
+      script: {
+        title: "找回：SCRIPT",
+        text: "一个值得自动化的小麻烦。它看起来很小，但可能替你省下很多次重复。"
+      },
+      map: {
+        title: "找回：MAP",
+        text: "一张还没有画完的地图。上面缺少道路，但已经有了一个想去的方向。"
+      },
+      bug: {
+        title: "找回：BUG?",
+        text: "它也许是一个 Bug，也许只是一个尚未被理解的功能。先不要急着删掉它。"
+      }
+    };
+
+    const sideQuests = [
+      "做一个小得离谱、却真的存在的东西。",
+      "把一个无聊步骤交给脚本，然后把省下的十分钟拿去散步。",
+      "给某个游戏规则轻轻推一下，看看会不会露出新的入口。",
+      "为一个暂时没有答案的问题，先做一个可以点击的版本。"
+    ];
+
+    const body = document.body;
+    const errorScene = document.getElementById("errorScene");
+    const gameScene = document.getElementById("gameScene");
+    const unstableZero = document.getElementById("unstableZero");
+    const scanButton = document.getElementById("scanButton");
+    let scanCount = document.getElementById("scanCount");
+    const statusLine = document.getElementById("statusLine");
+    const clueText = document.getElementById("clueText");
+    const errorMessage = document.getElementById("errorMessage");
+    const skipToGame = document.getElementById("skipToGame");
+    const counter = document.getElementById("counter");
+    const foundTitle = document.getElementById("foundTitle");
+    const foundOutput = document.getElementById("foundOutput");
+    const completePanel = document.getElementById("completePanel");
+    const questTitle = document.getElementById("questTitle");
+    const retryButton = document.getElementById("retryButton");
+    const fragmentButtons = [...document.querySelectorAll(".fragment")];
+
+    let scanLevel = 0;
+    let recovered = 0;
+
+    function runScan() {
+      if (scanLevel >= 3) return;
+
+      scanLevel += 1;
+      body.dataset.break = String(scanLevel);
+      scanCount.textContent = `${scanLevel} / 3`;
+
+      if (scanLevel === 1) {
+        statusLine.textContent = "LOST ITEMS: 1";
+        clueText.textContent = clues[0];
+        errorMessage.textContent = "This page could not be found. But something on it seems to have noticed you.";
+      } else if (scanLevel === 2) {
+        statusLine.textContent = "LOST ITEMS: 5";
+        clueText.textContent = clues[1];
+        errorMessage.textContent = "The page is not broken. It is holding something together.";
+      } else {
+        scanButton.disabled = true;
+        scanButton.textContent = "RECOVERY DOOR OPEN";
+        clueText.textContent = "找到入口。请小心，页面正在从错误中松开。";
+        window.setTimeout(openRecoveryRoom, 760);
+      }
+    }
+
+    function openRecoveryRoom() {
+      body.classList.add("game-opening");
+      window.setTimeout(() => {
+        errorScene.hidden = true;
+        gameScene.hidden = false;
+        gameScene.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 520);
+    }
+
+    function recoverFragment(button) {
+      if (button.classList.contains("found")) return;
+
+      const key = button.dataset.fragment;
+      const fragment = fragments[key];
+      button.classList.add("found");
+      button.disabled = true;
+      recovered += 1;
+
+      document.getElementById(`item-${key}`).classList.add("collected");
+      document.getElementById(`item-${key}`).textContent = `✓ ${key.toUpperCase()}`;
+      counter.textContent = `RECOVERED ${recovered} / 5`;
+      foundTitle.textContent = fragment.title;
+      foundOutput.textContent = fragment.text;
+
+      if (recovered === fragmentButtons.length) {
+        const quest = sideQuests[Math.floor(Math.random() * sideQuests.length)];
+        questTitle.textContent = quest;
+        completePanel.classList.add("visible");
+        foundTitle.textContent = "全部找回。";
+        foundOutput.textContent = "错误页面已恢复稳定。你带走的不是一个“正确答案”，而是一张新的支线任务卡。";
+      }
+    }
+
+    function resetGame() {
+      recovered = 0;
+      counter.textContent = "RECOVERED 0 / 5";
+      foundTitle.textContent = "扫描已开始。";
+      foundOutput.textContent = "这里藏着五个被错误页面吞掉的碎片。逐个点击它们，把它们带回来。";
+      completePanel.classList.remove("visible");
+
+      fragmentButtons.forEach((button) => {
+        const key = button.dataset.fragment;
+        button.classList.remove("found");
+        button.disabled = false;
+        const item = document.getElementById(`item-${key}`);
+        item.classList.remove("collected");
+        item.textContent = `□ ${key.toUpperCase()}`;
+      });
+    }
+
+    function restartError() {
+      resetGame();
+      scanLevel = 0;
+      body.dataset.break = "0";
+      body.classList.remove("game-opening");
+      scanCount.textContent = "0 / 3";
+      statusLine.textContent = "LOST ITEMS: 0";
+      clueText.textContent = "";
+      errorMessage.textContent = "This page could not be found. Or perhaps it has been misplaced somewhere more interesting.";
+      scanButton.disabled = false;
+      scanButton.innerHTML = 'RUN RECOVERY SCAN <span class="scan-count" id="scanCount">0 / 3</span>';
+      scanCount = document.getElementById("scanCount");
+      errorScene.hidden = false;
+      gameScene.hidden = true;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    unstableZero.addEventListener("click", runScan);
+    scanButton.addEventListener("click", runScan);
+    skipToGame.addEventListener("click", openRecoveryRoom);
+    fragmentButtons.forEach((button) => button.addEventListener("click", () => recoverFragment(button)));
+    retryButton.addEventListener("click", restartError);
+
+    // 如果访客停留几秒，给出一个温和的提示，不会让真正迷路的人无从离开。
+    window.setTimeout(() => {
+      if (scanLevel === 0) {
+        clueText.textContent = "提示：中间的 0 看起来有一点不稳定。";
+        clueText.style.opacity = "1";
+      }
+    }, 5200);
+  </script>
+</body>
+</html>
